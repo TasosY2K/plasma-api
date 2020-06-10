@@ -7,5 +7,6 @@ CREATE TABLE Devices (
   ISP VARCHAR(100),
   time_located VARCHAR(100),
   image_path VARCHAR(100),
-  votes INT
+  votes INT,
+  views INT
 )
