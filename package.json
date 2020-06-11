@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node api/index.js",
     "lint": "eslint . --fix --ext .js",
-    "watch": "nodemon api/index.js --watch api/index.js",
-    "db:setup": "node ./scripts/create_table.js",
-    "db:drop": "node ./scripts/drop_db.js"
+    "watch": "nodemon --watch api api/index.js",
+    "db:setup": "node ./scripts/db/create_table.js",
+    "db:drop": "node ./scripts/db/drop_db.js"
   },
   "keywords": [],
   "author": "",
