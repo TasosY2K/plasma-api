@@ -18,12 +18,15 @@ pool.query('CREATE DATABASE iot_votes_api', (err) => {
         password: process.env.DB_PASS,
         database: process.env.DB
     });
-    pool.query(fs.readFileSync(__dirname + "/sql/create_table_Users.sql").toString(), (err) => {
+    pool.query(fs.readFileSync(__dirname + "/sql/create_table_Bots.sql").toString(), (err) => {
         if (err) throw err;
         pool.query(fs.readFileSync(__dirname + "/sql/create_table_Devices.sql").toString(), (err) => {
             if (err) throw err;
-            console.log('Database setup complete ✅');
-            process.exit();
+            pool.query(fs.readFileSync(__dirname + "/sql/create_table_Users.sql").toString(), (err) => {
+                if (err) throw err;
+                console.log('[PSQL] Database setup complete ✅');
+                process.exit();
+            });
         });
     });
 });

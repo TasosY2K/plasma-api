@@ -1,4 +1,6 @@
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const Pool = require('pg').Pool;
 
 let pool = new Pool({
@@ -10,7 +12,8 @@ let pool = new Pool({
 
 pool.query('DROP DATABASE iot_votes_api', (err) => {
     if (err) throw err;
-    console.log('Database dropped ✅');
+    console.log('[PSQL] Database dropped ✅');
     process.exit();
 });
-    
+
+

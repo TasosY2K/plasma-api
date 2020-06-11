@@ -12,23 +12,33 @@ module.exports = (app, pool) => {
         });    
     });
 
-    app.get('/devices/:id', (req, res) => {
+    app.get('/devices/id/:id', (req, res) => {
         const id = req.params.id;
-        if (extra.validateIp(id)) {
-            pool.query('SELECT * FROM Devices WHERE ip_address = $1', [id], (err, rows) => {
-                if (rows.rows.length > 0) {
-                    res.json(rows.rows);
-                } else {
-                    res.sendStatus(404);
-                }
-            });
-        } else if (id) {
+        if (id) {
             pool.query('SELECT * FROM Devices WHERE id = $1', [id], (err, rows) => {
-                if (rows.rows.length > 0) {
-                    res.json(rows.rows);
-                } else {
-                    res.sendStatus(404);
-                }
+                res.json(rows.rows);
+            });
+        } else {
+            res.sendStatus(400);
+        }
+    });
+
+    app.get('/devices/ip/:ip', (req, res) => {
+        const ip = req.params.ip;
+        if (extra.validateIp(ip)) {
+            pool.query('SELECT * FROM Devices WHERE ip_address = $1', [ip], (err, rows) => {
+                res.json(rows.rows);
+            });
+        } else {
+            res.sendStatus(400);
+        }
+    });
+    
+    app.get('/devices/country/:country', (req, res) => {
+        const country = req.params.country;
+        if (country) {
+            pool.query('SELECT * FROM Devices WHERE Country = $1', [country], (err, rows) => {
+                res.json(rows.rows);
             });
         } else {
             res.sendStatus(400);
@@ -89,7 +99,7 @@ module.exports = (app, pool) => {
                     if (statusCode != 200) {
                         res.send(502);
                     } else {
-                        ipInfo(ipAddress, (err, data) => {
+                        ipInfo(ipAddress, (err, data) => {                            
                             if (err) res.sendStatus(500);
                             const uid = extra.generateId();
                             const imagePath = __dirname + '/img/' + uid + '.png'
@@ -100,19 +110,25 @@ module.exports = (app, pool) => {
                                     ip_address,
                                     status_code, 
                                     title, 
-                                    Country, 
-                                    ISP, 
+                                    country,
+                                    region,
+                                    city, 
+                                    isp,
+                                    location,
                                     time_located, 
                                     image_path, 
                                     votes,
                                     views
-                                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [
+                                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, [
                                     uid, 
                                     ipAddress,
                                     Number(statusCode), 
                                     title, 
-                                    data.country, 
+                                    data.country,
+                                    data.region,
+                                    data.city,
                                     data.org,
+                                    data.loc,
                                     moment().format('MMMM Do YYYY, h:mm:ss a'),
                                     imagePath,
                                     0,
@@ -132,6 +148,26 @@ module.exports = (app, pool) => {
         }
     });
     
+    app.delete('/devices/:id', (req, res) => {
+        const id = req.params.id;
+        if (id) {
+            pool.query('SELECT * FROM Devices WHERE id = $1', [id], (err, rows) => {
+                if (err) res.sendStatus(500);
+                if (rows.rows.length > 0) {
+                    fs.unlinkSync(rows.rows[0].image_path);
+                    pool.query('DELETE FROM Devices WHERE id = $1', [id], (err) => {
+                        if (err) res.sendStatus(500);
+                        res.sendStatus(200);
+                    });
+                } else {
+                    res.sendStatus(404);
+                }
+            });
+        } else {
+            res.sendStatus(400);   
+        }
+    });
+
     app.get('*', (req, res) => {
         res.sendStatus(404);
     });
