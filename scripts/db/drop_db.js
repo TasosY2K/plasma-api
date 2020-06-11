@@ -10,6 +10,7 @@ let pool = new Pool({
 
 pool.query('DROP DATABASE iot_votes_api', (err) => {
     if (err) throw err;
-    console.log('Database dropped successfully');
+    console.log('Database dropped ✅');
+    process.exit();
 });
     
