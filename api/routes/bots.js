@@ -1,5 +1,6 @@
 const extra = require('../../scripts/extras.js');
 const moment = require('moment');
+const bcrypt = require('bcryptjs');
 
 module.exports = (app, pool) => {
     app.get('/bots', (req, res) => {
@@ -9,7 +10,7 @@ module.exports = (app, pool) => {
     });
 
     app.post('/bots/register', (req, res) => {
-        const uid = extra.generateId();
+        const uuid = extra.generateId();
         const token = extra.generateId();
         pool.query(`INSERT INTO Bots (
             id,
@@ -19,15 +20,18 @@ module.exports = (app, pool) => {
             time_last_seen,
             requests
         ) VALUES ($1,$2,$3,$4,$5,$6)`, [
-            uid,
-            token,
+            uuid,
+            bcrypt.hashSync(token),
             req.ip,
             moment().format('YYYY-MM-DD HH:mm:ss'),
             moment().format('YYYY-MM-DD HH:mm:ss'),
             0
         ], (err) => {
-            if (err) res.sendStatus(500);
-            res.status(200, token);
+            if (err) res.send(err);
+            res.json({
+                "id": uuid,
+                "token": token 
+            });
         });
     });
 };

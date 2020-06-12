@@ -92,7 +92,7 @@ module.exports = (app, pool) => {
             if (extra.validateIp(ipAddress)) {
                 pool.query('SELECT id FROM Devices WHERE ip_address = $1', [ipAddress], (err, rows) => {
                     if (rows.rows.length > 0) {
-                        res.sendStatus(403);
+                        res.sendStatus(400);
                     } else {
                         axios({
                             method: 'get',

@@ -1,8 +1,10 @@
 require('dotenv').config();
 const express = require('express');
+const session = require('express-session');
 const Pool = require('pg').Pool;
 
 const filewalker = require('../scripts/filewalker.js');
+const extra = require('../scripts/extras.js');
 
 const app = express();
 const pool = new Pool({
@@ -12,6 +14,12 @@ const pool = new Pool({
     password: process.env.DB_PASS,
     database: process.env.DB
 });
+
+app.use(session({
+    secret: extra.generateId(),
+    resave: true, 
+    saveUninitialized: true
+}));
 
 app.set('json spaces', 2);
 
@@ -29,6 +37,4 @@ app.set('json spaces', 2);
     }); 
 })();
 
-app.listen(process.env.PORT, () => {
-    console.log('[EXPRESS] App started at port', process.env.PORT);
-})
+app.listen(process.env.PORT, '0.0.0.0', () => console.log('[EXPRESS] Server started at port', process.env.PORT));
