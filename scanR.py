@@ -14,17 +14,17 @@ def Check(ip):
 	try:
 		req = requests.get("http://" + ip, timeout=10, allow_redirects=True)
 		if req.status_code == 200:
-			print('[+] ' + ip)
+			print('[+] http://' + ip)
 			try:
 				x = requests.post("http://localhost:3000/devices/" + ip, timeout=30)
 				if x.status_code == 201:
-					print('[↑] ' + ip)
+					print('[↑] http://' + ip)
 				else:
 					print('[-] ' + x.text)
 			except:
 				pass
 		else:
-			print('[-] ' + ip)
+			print('[-] http://' + ip)
 	except:
 		pass
 

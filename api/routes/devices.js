@@ -9,7 +9,7 @@ module.exports = (app, pool) => {
     app.get('/devices', (req, res) => {
         pool.query('SELECT * FROM Devices', (err, rows) => {
             res.json(rows.rows);
-        });    
+        });
     });
 
     app.get('/devices/id/:id', (req, res) => {
@@ -73,7 +73,7 @@ module.exports = (app, pool) => {
             res.sendStatus(400);
         }
     });
-    
+
     app.get('/devices/search/ip/:term', (req, res) => {
         const term = req.params.term;
         if (term) {
