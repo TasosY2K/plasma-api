@@ -1,5 +1,5 @@
 CREATE TABLE Users (
-  id VARCHAR(32),
+  id VARCHAR(36),
   username VARCHAR(50),
   password VARCHAR(50),
   ip_address VARCHAR(15),

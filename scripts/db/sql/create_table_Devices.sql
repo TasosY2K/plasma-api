@@ -1,5 +1,5 @@
 CREATE TABLE Devices (
-  id VARCHAR(32),
+  id VARCHAR(36),
   ip_address VARCHAR(15),
   status_code INT,
   title VARCHAR(255),

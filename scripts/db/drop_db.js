@@ -1,6 +1,4 @@
 require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
 const Pool = require('pg').Pool;
 
 let pool = new Pool({

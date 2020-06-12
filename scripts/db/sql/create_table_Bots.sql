@@ -1,5 +1,5 @@
 CREATE TABLE Bots (
-  id VARCHAR(32),
+  id VARCHAR(36),
   token VARCHAR(32),
   ip_address VARCHAR(15),
   time_registered VARCHAR(100),

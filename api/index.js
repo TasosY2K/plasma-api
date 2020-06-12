@@ -13,14 +13,20 @@ const pool = new Pool({
     database: process.env.DB
 });
 
+app.set('json spaces', 2);
+
 (async () => {
-    const routes = await filewalker.walk(`${__dirname}/routes/`);
+    const routes = await filewalker.walk(__dirname + '/routes/');
 
     routes.forEach((route) => {
         const time = new Date().getMilliseconds();
         require(route.path)(app, pool);
         console.log(`[ROUTE] Loaded route ${route.name} in ${new Date().getMilliseconds() - time}ms`);
     });
+
+    app.get('*', (req, res) => {
+        res.sendStatus(404);
+    }); 
 })();
 
 app.listen(process.env.PORT, () => {
