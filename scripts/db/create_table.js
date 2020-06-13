@@ -22,11 +22,8 @@ pool.query('CREATE DATABASE iot_votes_api', (err) => {
         if (err) throw err;
         pool.query(fs.readFileSync(__dirname + "/sql/create_table_Devices.sql").toString(), (err) => {
             if (err) throw err;
-            pool.query(fs.readFileSync(__dirname + "/sql/create_table_Users.sql").toString(), (err) => {
-                if (err) throw err;
-                console.log('[PSQL] Database setup complete ✅');
-                process.exit();
-            });
+            console.log('[PSQL] Database setup complete ✅');
+            process.exit();
         });
     });
 });
