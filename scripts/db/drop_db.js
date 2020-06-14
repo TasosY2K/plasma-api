@@ -8,7 +8,7 @@ let pool = new Pool({
     password: process.env.DB_PASS
 });
 
-pool.query('DROP DATABASE iot_votes_api', (err) => {
+pool.query('DROP DATABASE ' + process.env.DB, (err) => {
     if (err) throw err;
     console.log('[PSQL] Database dropped ✅');
     process.exit();
