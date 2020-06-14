@@ -1,10 +1,11 @@
 require('dotenv').config();
 const express = require('express');
-const session = require('express-session');
 const Pool = require('pg').Pool;
+const figlet = require('figlet');
 
 const filewalker = require('../scripts/filewalker.js');
-const extra = require('../scripts/extras.js');
+
+console.log(figlet.textSync('plasma-api', {font: 'Graffiti'}));
 
 const app = express();
 const pool = new Pool({
@@ -15,12 +16,6 @@ const pool = new Pool({
     database: process.env.DB
 });
 
-app.use(session({
-    secret: extra.generateId(),
-    resave: true, 
-    saveUninitialized: true
-}));
-
 app.set('json spaces', 2);
 
 (async () => {
@@ -29,8 +24,12 @@ app.set('json spaces', 2);
     routes.forEach((route) => {
         const time = new Date().getMilliseconds();
         require(route.path)(app, pool);
-        console.log(`[ROUTE] Loaded route ${route.name} in ${new Date().getMilliseconds() - time}ms`);
+        console.log(`[EXPRESS] Loaded route ${route.name} in ${new Date().getMilliseconds() - time}ms`);
     });
+
+    app.get('/', (req, res) => {
+        res.sendStatus(200);
+    }); 
 
     app.get('*', (req, res) => {
         res.sendStatus(404);

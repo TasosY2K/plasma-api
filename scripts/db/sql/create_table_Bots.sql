@@ -4,5 +4,5 @@ CREATE TABLE Bots (
   ip_address VARCHAR(15),
   time_registered VARCHAR(100),
   time_last_seen VARCHAR(100),
-  requests INT
+  requests INTEGER
 )

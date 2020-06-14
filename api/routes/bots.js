@@ -1,12 +1,20 @@
 const extra = require('../../scripts/extras.js');
 const moment = require('moment');
-const bcrypt = require('bcryptjs');
 
 module.exports = (app, pool) => {
-    app.get('/bots', (req, res) => {
-        pool.query('SELECT * FROM Bots', (err, rows) => {
-            res.json(rows.rows);
-        });    
+    app.get('/bots/token/:token', (req, res) => {
+        const token = req.params.token;
+        if (token) {
+            pool.query('SELECT * FROM Bots WHERE token = $1', [token], (err, rows) => {
+                if (rows.rows.length > 0) {
+                    res.json(rows.rows);
+                } else {
+                    res.sendStatus(404);
+                }
+            });
+        } else {
+            res.sendStatus(400);
+        } 
     });
 
     app.post('/bots/register', (req, res) => {
@@ -21,7 +29,7 @@ module.exports = (app, pool) => {
             requests
         ) VALUES ($1,$2,$3,$4,$5,$6)`, [
             uuid,
-            bcrypt.hashSync(token),
+            token,
             req.ip,
             moment().format('YYYY-MM-DD HH:mm:ss'),
             moment().format('YYYY-MM-DD HH:mm:ss'),

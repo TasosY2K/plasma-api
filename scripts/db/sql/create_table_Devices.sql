@@ -1,7 +1,7 @@
 CREATE TABLE Devices (
   id VARCHAR(36),
   ip_address VARCHAR(15),
-  status_code INT,
+  status_code INTEGER,
   title VARCHAR(255),
   country VARCHAR(100),
   region VARCHAR(100),
@@ -9,7 +9,5 @@ CREATE TABLE Devices (
   isp VARCHAR(100),
   location VARCHAR(100),
   time_located VARCHAR(100),
-  image_path VARCHAR(100),
-  votes INT,
-  views INT
+  image_path VARCHAR(100)
 )

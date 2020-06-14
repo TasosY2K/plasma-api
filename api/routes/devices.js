@@ -1,9 +1,10 @@
 const fs = require('fs');
-const extra = require('../../scripts/extras.js');
 const axios = require('axios');
 const ipInfo = require('ipinfo');
 const webshot = require('webshot-node');
 const moment = require('moment');
+
+const extra = require('../../scripts/extras.js');
 
 module.exports = (app, pool) => {
     app.get('/devices', (req, res) => {
@@ -86,76 +87,108 @@ module.exports = (app, pool) => {
         }
     });
 
-    app.post('/devices/:ipAddress', (req, res) => {
-        let {ipAddress} = req.params;
-        if (ipAddress) {
+    app.get('/devices/search/region/:term', (req, res) => {
+        const term = req.params.term;
+        if (term) {
+            pool.query('SELECT * FROM Devices WHERE region LIKE $1', ['%' + term + '%'] , (err, rows) => {
+                if (err) res.sendStatus(err);
+                res.send(rows.rows);
+            });
+        } else {
+            res.sendStatus(400);
+        }
+    });
+
+    app.get('/devices/search/isp/:term', (req, res) => {
+        const term = req.params.term;
+        if (term) {
+            pool.query('SELECT * FROM Devices WHERE isp LIKE $1', ['%' + term + '%'] , (err, rows) => {
+                if (err) res.sendStatus(err);
+                res.send(rows.rows);
+            });
+        } else {
+            res.sendStatus(400);
+        }
+    });
+    
+    app.post('/devices/:ipAddress/:botToken', (req, res) => {
+        let {ipAddress, botToken} = req.params;
+        if (ipAddress && botToken) {
             if (extra.validateIp(ipAddress)) {
-                pool.query('SELECT id FROM Devices WHERE ip_address = $1', [ipAddress], (err, rows) => {
-                    if (rows.rows.length > 0) {
-                        res.sendStatus(400);
+                pool.query('SELECT requests FROM Bots WHERE token = $1', [botToken], (err, rows) => {
+                    const botRows = rows;                    
+                    if (!botRows.rows.length) {
+                        res.sendStatus(401);
                     } else {
-                        axios({
-                            method: 'get',
-                            url: 'http://' + ipAddress
-                        }).then((response) => {
-                            let title;
-                            if (!response.data || !response.data.includes('<title>')) {
-                                title = 'No Title';
+                        pool.query('SELECT id FROM Devices WHERE ip_address = $1', [ipAddress], (err, rows) => {
+                            if (rows.rows.length > 0) {
+                                res.sendStatus(409);
                             } else {
-                                title = response.data.toString().split('<title>')[1].split('</title>')[0];
-                            }
-                            const statusCode = response.status;
-                            if (statusCode != 200) {
-                                res.sendStatus(502);
-                            } else {
-                                ipInfo(ipAddress, (err, data) => {                            
-                                    if (err) {
-                                        res.sendStatus(500);
+                                axios({
+                                    method: 'get',
+                                    url: 'http://' + ipAddress
+                                }).then((response) => {
+                                    let title;
+                                    if (!response.data || !response.data.includes('<title>')) {
+                                        title = 'No Title';
                                     } else {
-                                        const uid = extra.generateId();
-                                        const imagePath = __dirname + '/img/' + uid + '.png'
-                                        webshot('http://' + ipAddress, imagePath, (err) => {
+                                        title = response.data.toString().split('<title>')[1].split('</title>')[0];
+                                    }
+                                    const statusCode = response.status;
+                                    if (statusCode != 200) {
+                                        res.sendStatus(502);
+                                    } else {
+                                        ipInfo(ipAddress, (err, data) => {                            
                                             if (err) {
                                                 res.sendStatus(500);
                                             } else {
-                                                pool.query(`INSERT INTO Devices (
-                                                    id, 
-                                                    ip_address,
-                                                    status_code, 
-                                                    title, 
-                                                    country,
-                                                    region,
-                                                    city, 
-                                                    isp,
-                                                    location,
-                                                    time_located, 
-                                                    image_path, 
-                                                    votes,
-                                                    views
-                                                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, [
-                                                    uid, 
-                                                    ipAddress,
-                                                    Number(statusCode), 
-                                                    title, 
-                                                    data.country,
-                                                    data.region,
-                                                    data.city,
-                                                    data.org,
-                                                    data.loc,
-                                                    moment().format('YYYY-MM-DD HH:mm:ss'),
-                                                    imagePath,
-                                                    0,
-                                                    0
-                                                ], () => {
-                                                    res.sendStatus(201);
+                                                const uid = extra.generateId();
+                                                const imagePath = '../img/' + uid + '.png'
+                                                webshot('http://' + ipAddress, imagePath, (err) => {
+                                                    if (err) {
+                                                        res.sendStatus(500);
+                                                    } else {
+                                                        pool.query(`INSERT INTO Devices (
+                                                            id, 
+                                                            ip_address,
+                                                            status_code, 
+                                                            title, 
+                                                            country,
+                                                            region,
+                                                            city, 
+                                                            isp,
+                                                            location,
+                                                            time_located, 
+                                                            image_path
+                                                        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [
+                                                            uid, 
+                                                            ipAddress,
+                                                            Number(statusCode), 
+                                                            title, 
+                                                            data.country,
+                                                            data.region,
+                                                            data.city,
+                                                            data.org,
+                                                            data.loc,
+                                                            moment().format('YYYY-MM-DD HH:mm:ss'),
+                                                            imagePath
+                                                        ], () => {
+                                                            pool.query('UPDATE Bots SET ip_address = $1, time_last_seen = $2, requests = $3 WHERE token = $4', [
+                                                                req.ip, moment().format('YYYY-MM-DD HH:mm:ss'), parseInt(botRows.rows[0].requests) + 1, botToken
+                                                            ], () => {
+                                                                console.log(`[BOT] upload from ${req.ip} | ${botToken}`);
+                                                                res.sendStatus(201);
+                                                            });
+                                                        });
+                                                    }
                                                 });
                                             }
-                                        });
+                                        }); 
                                     }
-                                }); 
+                                }).catch(err => {
+                                    if (err) res.sendStatus(406);
+                                });
                             }
-                        }).catch(err => {
-                            if (err) res.sendStatus(406);
                         });
                     }
                 });
@@ -167,6 +200,7 @@ module.exports = (app, pool) => {
         }
     });
     
+    /* Not really safe for now
     app.delete('/devices/:id', (req, res) => {
         const id = req.params.id;
         if (id) {
@@ -185,5 +219,6 @@ module.exports = (app, pool) => {
         } else {
             res.sendStatus(400);   
         }
-    }); 
+    });
+    */
 };

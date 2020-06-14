@@ -9,7 +9,7 @@ let pool = new Pool({
     password: process.env.DB_PASS
 });
 
-pool.query('CREATE DATABASE iot_votes_api', (err) => {
+pool.query('CREATE DATABASE ' + process.env.DB, (err) => {
     if (err) throw err;
     pool = new Pool({
         port: process.env.DB_PORT,
