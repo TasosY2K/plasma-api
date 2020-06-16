@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const Pool = require('pg').Pool;
 const figlet = require('figlet');
 
@@ -17,6 +18,7 @@ const pool = new Pool({
 });
 
 app.set('json spaces', 2);
+app.use(cors());
 
 (async () => {
     const routes = await filewalker.walk(__dirname + '/routes/');
