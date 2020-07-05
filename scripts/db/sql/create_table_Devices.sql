@@ -1,4 +1,5 @@
 CREATE TABLE Devices (
+  num SERIAL PRIMARY KEY,
   id VARCHAR(36),
   ip_address VARCHAR(15),
   status_code INTEGER,

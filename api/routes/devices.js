@@ -24,6 +24,22 @@ module.exports = (app, pool) => {
         }
     });
 
+    app.get('/devices/num/:start/:end', (req, res) => {
+        const start = req.params.start;
+        const end = req.params.end;
+        if (start && end) {
+            pool.query('SELECT * FROM Devices WHERE num BETWEEN $1 and $2', [start, end], (err, rows) => {
+                if (rows.rows.length > 0) {
+                    res.json(rows.rows);
+                } else {
+                    res.sendStatus(404);
+                }
+            });
+        } else {
+            res.sendStatus(400);
+        } 
+    });
+
     app.get('/devices/ip/:ip', (req, res) => {
         const ip = req.params.ip;
         if (extra.validateIp(ip)) {
