@@ -129,7 +129,7 @@ module.exports = (app, pool) => {
                                     url: 'http://' + ipAddress
                                 }).then((response) => {
                                     let title;
-                                    if (!response.data || !response.data.includes('<title>')) {
+                                    if (!response.data || !response.data.includes('<title>') || response.data.includes('�')) {
                                         title = 'No Title';
                                     } else {
                                         title = response.data.toString().split('<title>')[1].split('</title>')[0];
