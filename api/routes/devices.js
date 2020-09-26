@@ -160,7 +160,7 @@ module.exports = (app, pool) => {
                                             } else {
                                                 const uid = extra.generateId();
                                                 const imagePath = 'api/img/' + uid + '.png'
-                                                webshot('http://' + ipAddress, imagePath, (err) => {
+                                                webshot('http://' + ipAddress, imagePath, err => {
                                                     if (err) {
                                                         res.sendStatus(500);
                                                     } else {

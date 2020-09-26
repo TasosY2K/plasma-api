@@ -1,5 +1,6 @@
-const extra = require('../../scripts/extras.js');
 const moment = require('moment');
+
+const extra = require('../../scripts/extras.js');
 
 module.exports = (app, pool) => {
     app.get('/bots/token/:token', (req, res) => {
