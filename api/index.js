@@ -38,4 +38,4 @@ app.use(cors());
     }); 
 })();
 
-app.listen(process.env.PORT, '0.0.0.0', () => console.log('[EXPRESS] Server started at port', process.env.PORT));
+app.listen(process.env.PORT, '127.0.0.1', () => console.log('[EXPRESS] Server started at port', process.env.PORT));
